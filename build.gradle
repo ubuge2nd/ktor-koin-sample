@@ -1,0 +1,64 @@
+group 'com.sample'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.1.51'
+    ext.ktor_version = '0.9.1'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath group: 'org.xerial', name: 'sqlite-jdbc', version: "3.21.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+
+mainClassName = 'com.sample.LifelogApplicationKt'
+
+sourceSets {
+    main.kotlin.srcDirs = [ 'src' ]
+    test.kotlin.srcDirs = [ 'test' ]
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url  "http://dl.bintray.com/kotlin/ktor" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
+    maven { url "https://dl.bintray.com/kotlin/exposed/" }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "io.ktor:ktor-server-core:$ktor_version"
+    compile "io.ktor:ktor-server-netty:$ktor_version"
+    compile "io.ktor:ktor-html-builder:$ktor_version"
+    compile "ch.qos.logback:logback-classic:1.2.1"
+    compile 'org.koin:koin-ktor:0.9.3'
+    compile 'org.jetbrains.exposed:exposed:0.9.1'
+    runtime group: 'org.xerial', name: 'sqlite-jdbc', version: '3.21.0'
+
+    testCompile "io.ktor:ktor-server-test-host:$ktor_version"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "org.mockito:mockito-core:2.+"
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
