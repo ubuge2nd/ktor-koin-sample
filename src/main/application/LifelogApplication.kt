@@ -13,12 +13,12 @@ import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.html.*
+import main.domain.model.ActivityRepository
 import main.infrastructure.ActivityDataSource
 import main.domain.service.ActivityService
-
-fun main(args: Array<String>) {
-    embeddedServer(Netty, commandLineEnvironment(args)).start()
-}
+import org.koin.dsl.module.applicationContext
+import org.koin.ktor.ext.inject
+import org.koin.standalone.StandAloneContext.startKoin
 
 /**
  * メインのアプリケーション。
@@ -54,7 +54,7 @@ fun Application.main() {
         }
 
         get("/activity") {
-            val activityService = ActivityService(ActivityDataSource())
+            val activityService: ActivityService by inject()
             val activities = activityService.getRegisteredActivities()
             if(activities.isEmpty()) {
                 call.respond("記録はありません。")
@@ -75,5 +75,15 @@ fun Application.main() {
             }
         }
     }
+}
+
+fun main(args: Array<String>) {
+    startKoin(listOf(appModule))
+    embeddedServer(Netty, commandLineEnvironment(args)).start()
+}
+
+val appModule = applicationContext {
+    factory { ActivityDataSource() as ActivityRepository }
+    factory { ActivityService(get()) }
 }
 
