@@ -1,4 +1,4 @@
-package main.infrastructure
+package infrastructure
 
 import org.jetbrains.exposed.sql.Database
 import java.net.URI

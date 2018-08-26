@@ -1,21 +1,22 @@
 package application
 
-import com.sample.main
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.whenever
+import domain.model.Activity
+import domain.model.ActivityRepository
+import domain.service.ActivityService
 import io.ktor.application.Application
-import io.ktor.http.HttpStatusCode
+import io.ktor.content.PartData
+import io.ktor.http.*
 import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
-import main.domain.model.Activity
-import main.domain.model.ActivityRepository
-import main.domain.service.ActivityService
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.koin.dsl.module.applicationContext
 import org.koin.standalone.StandAloneContext
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import java.util.*
 
 /**
@@ -36,7 +37,7 @@ class ApplicationTest {
     @Before
     fun setUp() {
 
-        mockActivityRepository = mock(ActivityRepository::class.java)
+        mockActivityRepository = mock<ActivityRepository> {}
 
         StandAloneContext.startKoin(listOf(testModule))
     }
@@ -71,7 +72,21 @@ class ApplicationTest {
         val path = "/activity"
 
         // act
-        with(handleRequest(method, path)) {
+        with(handleRequest(method, path) {
+
+            val boundary = "***bbb***"
+
+            addHeader(HttpHeaders.ContentType, ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
+            setBody(boundary, listOf(
+                    PartData.FormItem("test", { }, headersOf(
+                            HttpHeaders.ContentDisposition,
+                            ContentDisposition.Inline
+                                    .withParameter(ContentDisposition.Parameters.Name, "activityName")
+                                    .toString()
+                    ))
+            ))
+
+        }) {
 
             // assert
             assertEquals(HttpStatusCode.OK, response.status())
@@ -80,10 +95,40 @@ class ApplicationTest {
     }
 
     @Test
+    fun request_postActivity_activityNameIsEmpty() = withTestApplication(Application::main) {
+
+        // arrange
+        val method = io.ktor.http.HttpMethod.Post
+        val path = "/activity"
+
+        // act
+        with(handleRequest(method, path) {
+
+            val boundary = "***bbb***"
+
+            addHeader(HttpHeaders.ContentType, ContentType.MultiPart.FormData.withParameter("boundary", boundary).toString())
+            setBody(boundary, listOf(
+                    PartData.FormItem("", { }, headersOf(
+                            HttpHeaders.ContentDisposition,
+                            ContentDisposition.Inline
+                                    .withParameter(ContentDisposition.Parameters.Name, "activityName")
+                                    .toString()
+                    ))
+            ))
+
+        }) {
+
+            // assert
+            assertEquals(HttpStatusCode.OK, response.status())
+            assertTrue(response.content!!.contains("記録するデータがありませんでした。"))
+        }
+    }
+
+    @Test
     fun request_getActivity()  = withTestApplication(Application::main) {
 
         // arrange
-        `when`(mockActivityRepository.get()).thenReturn(testActivities)
+        whenever(mockActivityRepository.get()).thenReturn(testActivities)
 
         val method = io.ktor.http.HttpMethod.Get
         val path = "/activity"
@@ -103,7 +148,8 @@ class ApplicationTest {
     fun request_getActivity_andActivitiesIsEmpty()  = withTestApplication(Application::main) {
 
         // arrange
-        `when`(mockActivityRepository.get()).thenReturn(ArrayList<Activity>())
+        val emptyActivity = ArrayList<Activity>()
+        whenever(mockActivityRepository.get()).thenReturn(emptyActivity)
         val method = io.ktor.http.HttpMethod.Get
         val path = "/activity"
 

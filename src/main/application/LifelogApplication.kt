@@ -1,24 +1,21 @@
-package com.sample
+package application
 
+import domain.service.ActivityService
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.content.PartData
 import io.ktor.features.CallLogging
 import io.ktor.html.respondHtml
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.isMultipart
+import io.ktor.request.receiveMultipart
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.routing.post
-import io.ktor.server.engine.commandLineEnvironment
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import kotlinx.html.*
-import main.domain.model.ActivityRepository
-import main.infrastructure.ActivityDataSource
-import main.domain.service.ActivityService
-import org.koin.dsl.module.applicationContext
 import org.koin.ktor.ext.inject
-import org.koin.standalone.StandAloneContext.startKoin
 
 /**
  * メインのアプリケーション。
@@ -32,9 +29,9 @@ fun Application.main() {
             call.respondHtml {
                 body {
                     h2 { text("アクティビティを記録") }
-                    form(action = "/activity", method = FormMethod.post) {
+                    form(action = "/activity", encType = FormEncType.multipartFormData, method = FormMethod.post) {
                         p {
-                            textInput(name = "activity") { value = "" }
+                            textInput(name = "activityName") { value = "" }
                         }
                         p {
                             submitInput { value = "記録する" }
@@ -50,7 +47,27 @@ fun Application.main() {
         }
 
         post("/activity") {
-            call.respond("記録しました。")
+            val multipart = call.receiveMultipart()
+            var activityName: String = ""
+
+            while (true) {
+                val part = multipart.readPart() ?: break
+                when (part) {
+                    is PartData.FormItem -> {
+                        if (part.name == "activityName") {
+                            activityName = part.value
+                        }
+                    }
+                }
+            }
+
+            if (activityName.isEmpty()) {
+                call.respond("記録するデータがありませんでした。")
+            } else {
+                val activityService: ActivityService by inject()
+                activityService.registerActivity(activityName)
+                call.respond("記録しました。")
+            }
         }
 
         get("/activity") {
@@ -76,14 +93,3 @@ fun Application.main() {
         }
     }
 }
-
-fun main(args: Array<String>) {
-    startKoin(listOf(appModule))
-    embeddedServer(Netty, commandLineEnvironment(args)).start()
-}
-
-val appModule = applicationContext {
-    factory { ActivityDataSource() as ActivityRepository }
-    factory { ActivityService(get()) }
-}
-

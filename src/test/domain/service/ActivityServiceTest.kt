@@ -1,13 +1,11 @@
 package domain.service
 
-import main.domain.model.Activity
-import main.domain.model.ActivityRepository
-import main.domain.service.ActivityService
+import com.nhaarman.mockito_kotlin.*
+import domain.model.Activity
+import domain.model.ActivityRepository
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import java.util.*
 
 /**
@@ -24,7 +22,7 @@ class ActivityServiceTest {
     @Before
     fun setUp() {
 
-        mockActivityRepository = mock(ActivityRepository::class.java)
+        mockActivityRepository = mock<ActivityRepository> {}
 
         activityService = ActivityService(mockActivityRepository)
     }
@@ -33,12 +31,13 @@ class ActivityServiceTest {
     fun getRegisteredActivities_whenRepositoryHasActivities() {
 
         // arrange
-        `when`(mockActivityRepository.get()).thenReturn(testActivities)
+        whenever(mockActivityRepository.get()).thenReturn(testActivities)
 
         // act
         val result = activityService.getRegisteredActivities()
 
         // assert
+        assertFalse(result.isEmpty())
         assertEquals(testActivities, result)
     }
 
@@ -46,12 +45,31 @@ class ActivityServiceTest {
     fun getRegisteredActivities_whenRepositoryDoesNotHaveActivity_isEmpty() {
 
         // arrange
-        `when`(mockActivityRepository.get()).thenReturn(ArrayList<Activity>())
+        val emptyActivity = ArrayList<Activity>()
+        whenever(mockActivityRepository.get()).thenReturn(emptyActivity)
 
         // act
         val result = activityService.getRegisteredActivities()
 
         // assert
         assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun registerActivity() {
+
+        // act
+        activityService.registerActivity("test")
+
+        // assert
+        argumentCaptor<Activity>().apply {
+
+            // ActivityRepositoryがアクティビティを保存している
+            verify(mockActivityRepository, times(1)).add(capture())
+
+            assertEquals(1, allValues.size)
+            assertEquals(0, firstValue.id) // idは常に0となる
+            assertEquals("test", firstValue.name)
+        }
     }
 }

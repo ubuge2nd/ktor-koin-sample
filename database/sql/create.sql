@@ -1,5 +1,5 @@
 create table activities
 (
-    id integer primary key,
+    id SERIAL primary key,
     name text
 );

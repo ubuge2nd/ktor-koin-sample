@@ -1,4 +1,4 @@
-package main.domain.model
+package domain.model
 
 import java.util.*
 

@@ -1,8 +1,9 @@
-package main.infrastructure
+package infrastructure
 
-import main.domain.model.Activity
-import main.domain.model.ActivityRepository
+import domain.model.Activity
+import domain.model.ActivityRepository
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
@@ -13,17 +14,17 @@ import java.util.*
  */
 private object Activities: Table() {
     // ID
-    val id=integer("id").primaryKey()
+    val id = long("id").primaryKey().autoIncrement()
     // タイトル
-    val name=text("name")
+    val name = text("name")
 }
 
 /**
  * PostgreSqlを使用したアクティビティリポジトリ。
  *
- * 接続時にはDBのActivitiesテーブルから取得している。
+ * 接続時にはDBのActivitiesテーブルへアクセスしている。
  */
-class ActivityDataSource: ActivityRepository {
+class PostgresActivityRepository: ActivityRepository {
 
     init {
         DatabaseConnector.connect()
@@ -39,5 +40,13 @@ class ActivityDataSource: ActivityRepository {
         }
 
         return results
+    }
+
+    override fun add(activity: Activity) {
+        transaction {
+            Activities.insert {
+                it[name] = activity.name
+            }
+        }
     }
 }
