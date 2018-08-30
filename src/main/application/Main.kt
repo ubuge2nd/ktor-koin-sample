@@ -2,7 +2,8 @@ package application
 
 import domain.model.ActivityRepository
 import domain.service.ActivityService
-import infrastructure.PostgresActivityRepository
+import infrastructure.ExposedActivityRepository
+import infrastructure.PostgresDataBaseConnector
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -15,7 +16,7 @@ fun main(args: Array<String>) {
 }
 
 val appModule = applicationContext {
-    factory { PostgresActivityRepository() as ActivityRepository }
+    factory { ExposedActivityRepository(PostgresDataBaseConnector) as ActivityRepository }
     factory { ActivityService(get()) }
 }
 

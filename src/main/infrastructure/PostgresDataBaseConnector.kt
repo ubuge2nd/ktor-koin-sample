@@ -3,7 +3,7 @@ package infrastructure
 import org.jetbrains.exposed.sql.Database
 import java.net.URI
 
-object DatabaseConnector {
+object PostgresDataBaseConnector: DataBaseConnector {
 
     private val envUrl: URI
         get(): URI {
@@ -16,7 +16,7 @@ object DatabaseConnector {
 
     private val password: String = envUrl.userInfo.split(":")[1]
 
-    fun connect() {
+    override fun connect() {
         Database.connect(url, "org.postgresql.Driver", user = username, password = password)
     }
 }

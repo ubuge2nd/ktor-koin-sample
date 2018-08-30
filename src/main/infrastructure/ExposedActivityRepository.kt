@@ -20,14 +20,14 @@ private object Activities: Table() {
 }
 
 /**
- * PostgreSqlを使用したアクティビティリポジトリ。
+ * Exposedによるアクティビティのリポジトリ。
  *
- * 接続時にはDBのActivitiesテーブルへアクセスしている。
+ * Activitiesテーブルへアクセスしている。
  */
-class PostgresActivityRepository: ActivityRepository {
+class ExposedActivityRepository(dataBaseConnector: DataBaseConnector): ActivityRepository {
 
     init {
-        DatabaseConnector.connect()
+        dataBaseConnector.connect()
     }
 
     override fun get(): List<Activity> {
