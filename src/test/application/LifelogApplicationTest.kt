@@ -26,7 +26,7 @@ class ApplicationTest {
     // アクティビティリポジトリのモック
     private lateinit var mockActivityRepository: ActivityRepository
     // アクティビティのテストデータ
-    private val testActivities = mutableListOf<Activity>(Activity(0, "test1", Date()), Activity(1, "test2", Date()))
+    private val testActivities = mutableListOf(Activity(0, "test1", Date()), Activity(1, "test2", Date()))
 
     // テストモジュール
     private val testModule = applicationContext {
@@ -37,7 +37,7 @@ class ApplicationTest {
     @Before
     fun setUp() {
 
-        mockActivityRepository = mock<ActivityRepository> {}
+        mockActivityRepository = mock {}
 
         StandAloneContext.startKoin(listOf(testModule))
     }

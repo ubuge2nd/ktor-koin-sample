@@ -7,8 +7,6 @@ import io.ktor.application.install
 import io.ktor.content.PartData
 import io.ktor.features.CallLogging
 import io.ktor.html.respondHtml
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.isMultipart
 import io.ktor.request.receiveMultipart
 import io.ktor.response.respond
 import io.ktor.routing.Routing
@@ -48,7 +46,7 @@ fun Application.main() {
 
         post("/activity") {
             val multipart = call.receiveMultipart()
-            var activityName: String = ""
+            var activityName = ""
 
             while (true) {
                 val part = multipart.readPart() ?: break
