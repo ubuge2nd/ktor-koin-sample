@@ -26,6 +26,9 @@ fun Application.main() {
 
         get("/") {
             call.respondHtml {
+                head {
+                    title("ライフログ")
+                }
                 body {
                     h2 { text("アクティビティを記録") }
                     form(action = "/activity", encType = FormEncType.multipartFormData, method = FormMethod.post) {
