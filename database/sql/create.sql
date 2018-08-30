@@ -1,5 +1,6 @@
 create table activities
 (
     id SERIAL primary key,
-    name text
+    title text,
+    entry_date timestamp
 );

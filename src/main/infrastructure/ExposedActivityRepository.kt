@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 import java.sql.Connection
 import java.util.*
 
@@ -16,7 +17,9 @@ private object Activities: Table() {
     // ID
     val id = long("id").primaryKey().autoIncrement()
     // タイトル
-    val name = text("name")
+    val title = text("title")
+    // 登録日時
+    val entryDate = datetime("entry_date")
 }
 
 /**
@@ -35,7 +38,7 @@ class ExposedActivityRepository(dataBaseConnector: DataBaseConnector): ActivityR
 
         transaction(transactionIsolation = Connection.TRANSACTION_SERIALIZABLE, repetitionAttempts = 3) {
             Activities.selectAll().forEach {
-                results.add(Activity(it[Activities.id].toLong(), it[Activities.name], Date()))
+                results.add(Activity(it[Activities.id].toLong(), it[Activities.title], it[Activities.entryDate].toDate()))
             }
         }
 
@@ -45,7 +48,8 @@ class ExposedActivityRepository(dataBaseConnector: DataBaseConnector): ActivityR
     override fun add(activity: Activity) {
         transaction {
             Activities.insert {
-                it[name] = activity.name
+                it[title] = activity.title
+                it[entryDate] = DateTime(activity.entryDate)
             }
         }
     }

@@ -14,6 +14,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import kotlinx.html.*
 import org.koin.ktor.ext.inject
+import java.text.SimpleDateFormat
 
 /**
  * メインのアプリケーション。
@@ -78,10 +79,11 @@ fun Application.main() {
                     body {
                         h2 { text("記録されたアクティビティ一覧") }
                         table {
-                            for(i in 0..(activities.size - 1)) {
+                            for(i in (activities.size - 1) downTo 0) {
                                 tr {
                                     td { text(activities[i].id) }
-                                    td { text(activities[i].name) }
+                                    td { text(SimpleDateFormat("yyyy/MM/dd(E) HH:mm").format(activities[i].entryDate)) }
+                                    td { text(activities[i].title) }
                                 }
                             }
                         }

@@ -69,7 +69,7 @@ class ActivityServiceTest {
 
             assertEquals(1, allValues.size)
             assertEquals(0, firstValue.id) // idは常に0となる
-            assertEquals("test", firstValue.name)
+            assertEquals("test", firstValue.title)
         }
     }
 }
