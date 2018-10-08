@@ -1,4 +1,4 @@
-# ktor-koin-test
+# ktor-koin-sample
 
 Ktorの学習用に作ったライフログアプリです。あくまで学習用なので実用性はありません。
 
